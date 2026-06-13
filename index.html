@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>Álbum 26 — Mundial 2026</title>
+  <meta name="description" content="Controla tu álbum de láminas Panini del Mundial 2026." />
+  <meta name="theme-color" content="#E6007E" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="favicon.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Álbum 26" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Encabezado + progreso -->
+  <header class="app-head">
+    <div class="head-row">
+      <div class="wordmark">
+        <span class="tile">26</span>
+        <span class="name">ÁLBUM 26<small>Mundial 2026</small></span>
+      </div>
+      <span class="spacer"></span>
+      <button class="icon-btn" id="menuBtn" aria-label="Menú">⋯</button>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="pct" id="pct">0%</span>
+        <span class="frac" id="frac">0 / 980</span>
+      </div>
+      <div class="bar"><span id="barFill"></span></div>
+      <div class="counts">
+        <span><span class="dot tengo"></span>Tengo <b id="cTengo">0</b></span>
+        <span><span class="dot falta"></span>Faltan <b id="cFalta">980</b></span>
+        <span><span class="dot repe"></span>Repetidas <b id="cRepe">0</b></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Controles -->
+  <div class="controls">
+    <div class="controls-inner">
+      <div class="search" id="searchWrap">
+        <span aria-hidden="true">🔎</span>
+        <input id="search" type="search" inputmode="search" placeholder="Buscar por código o jugador…" autocomplete="off" />
+        <button class="clear" id="searchClear" aria-label="Limpiar">×</button>
+      </div>
+      <div class="row-2">
+        <div class="chips" role="group" aria-label="Filtros de estado">
+          <button class="chip" data-filter="all" aria-pressed="true">Todas</button>
+          <button class="chip" data-filter="falta" aria-pressed="false">Me faltan</button>
+          <button class="chip" data-filter="tengo" aria-pressed="false">Tengo</button>
+          <button class="chip" data-filter="repe" aria-pressed="false">Repetidas</button>
+        </div>
+        <select class="team-select" id="teamSelect" aria-label="Filtrar por selección"></select>
+      </div>
+      <button class="scan-btn" id="scanBtn"><span>📷</span> Escanear láminas</button>
+    </div>
+  </div>
+
+  <main id="grid" aria-live="polite"></main>
+
+  <!-- Hoja: menú -->
+  <div class="sheet-backdrop" id="backdrop"></div>
+  <div class="sheet" id="menuSheet" role="dialog" aria-modal="true" aria-label="Menú">
+    <div class="grab"></div>
+    <h3>Opciones</h3>
+    <div class="body">
+      <button class="menu-item" id="exportBtn"><span class="ic">⬇️</span><span>Exportar progreso<small>Descarga un archivo .json de respaldo</small></span></button>
+      <label class="menu-item" for="importFile"><span class="ic">⬆️</span><span>Importar progreso<small>Carga un .json exportado antes</small></span></label>
+      <input type="file" id="importFile" accept="application/json,.json" hidden />
+      <button class="menu-item danger" id="resetBtn"><span class="ic">🗑️</span><span>Borrar todo el progreso<small>Vuelve a dejar las 980 como faltantes</small></span></button>
+      <p class="sub" style="margin-top:10px">Tu progreso se guarda solo en este dispositivo. Datos del álbum: 980 láminas (48 selecciones + apertura + historia).</p>
+    </div>
+  </div>
+
+  <!-- Hoja: escaneo -->
+  <div class="sheet" id="scanSheet" role="dialog" aria-modal="true" aria-label="Escanear láminas">
+    <div class="grab"></div>
+    <h3>Escanear láminas</h3>
+    <p class="sub">Toma una foto de las láminas sueltas (planas y bien iluminadas). El OCR detecta los códigos impresos; tú confirmas antes de marcar.</p>
+    <div class="body">
+      <div class="scan-pick">
+        <label class="pickbtn" for="cameraInput">📷 Tomar foto<small>Usa la cámara</small><input type="file" id="cameraInput" accept="image/*" capture="environment" /></label>
+        <label class="pickbtn" for="galleryInput">🖼️ Elegir de la galería<small>Sube una imagen existente</small><input type="file" id="galleryInput" accept="image/*" /></label>
+      </div>
+      <div class="ocr-status" id="ocrStatus"><span class="spinner"></span><span id="ocrMsg">Procesando…</span></div>
+
+      <div class="divider">o ingresa los códigos a mano</div>
+      <div class="bulk">
+        <textarea id="bulkText" placeholder="Ej: ARG17, BRA13, FWC9, MEX2 …"></textarea>
+        <button class="btn-primary" id="bulkBtn">Procesar texto</button>
+      </div>
+
+      <div id="reviewWrap" style="display:none">
+        <div class="divider">revisa y confirma</div>
+        <div class="review-list" id="reviewList"></div>
+        <div class="review-actions">
+          <button class="btn-ghost" id="reviewCancel">Cancelar</button>
+          <button class="btn-primary" id="reviewApply">Aplicar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
